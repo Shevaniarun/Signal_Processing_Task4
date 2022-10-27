@@ -75,11 +75,63 @@ for i in range(len(file)):
     import matplotlib.pyplot as plt
     step_count=dic['captured_data']['act']['step count']
     print(type(step_count))
-    for i in range(len(step_count)):
-        if step_count[i] > 5:
-            plt.plot(i,bpm[i],color='red',marker='.')
+    print(len(step_count))
+    new_list=np.array(new_list)/1000
+    bpm=np.array(bpm)
+    new=step_count[0:int(new_list[-1]/10)]
+    print(len(new))
+# import scipy.signal as signal
+# import matplotlib.pyplot as plt
+# filter_order=4
+# cutoff_frequency=0.05
+# B, A= signal.butter(filter_order,cutoff_frequency,output='ba')
+# filtered_signal=signal.filtfilt(B,A,new)
+
+# x=new_list[(new_list > i* 10) & (new_list <= (i+1)* 10)]
+# y=bpm[(new_list > i* 10) & (new_list <= (i+1)* 10)]
+    filtered_x=[]
+    filtered_y=[]
+    for i in range(len(new)):
+        x=new_list[(new_list > i* 10) & (new_list <= (i+1)* 10)].tolist()
+        y=bpm[(new_list > i* 10) & (new_list <= (i+1)* 10)].tolist()
+  # import pdb;pdb.set_trace()
+  # plt.plot(new_list[(new_list > i* 10) & (new_list <= (i+1)* 10)],bpm[(new_list > i* 10) & (new_list <= (i+1)* 10)])
+        if new[i]>5:
+            plt.plot(x,y,color="red")
         else:
-            plt.plot(i,bpm[i],color='green',marker='.')    
+            plt.plot(x,y,color="blue")
+        filtered_x.append(x)
+        filtered_y.append(y)
+
+    plt.show()
+    li=sum(filtered_y,[])
+    print(li)
+# import pdb;pdb.set_trace()
+    import scipy.signal as signal
+    import matplotlib.pyplot as plt
+    filter_order=4
+    cutoff_frequency=0.05
+    B, A= signal.butter(filter_order,cutoff_frequency,output='ba')
+    filtered_signal=signal.filtfilt(B,A,li)
+    # import pdb;pdb.set_trace()
+    lit=li[-3:-1]
+    print(lit)
+    filtered_signal=np.append(filtered_signal,lit)
+    print(len(filtered_signal))
+    print(len(filtered_x))
+    print(len(filtered_y))
+    print(len(li))
+    for i in range(len(new)):
+        x=new_list[(new_list > i* 10) & (new_list <= (i+1)* 10)]
+        y=filtered_signal[(new_list > i* 10) & (new_list <= (i+1)* 10)]
+  # import pdb;pdb.set_trace()
+  # plt.plot(new_list[(new_list > i* 10) & (new_list <= (i+1)* 10)],bpm[(new_list > i* 10) & (new_list <= (i+1)* 10)])
+        if new[i]>5:
+            plt.plot(x,y,color="red")
+        else:
+            plt.plot(x,y,color="blue")
+# plt.plot(filtered_signal)
+
     plt.show()
 
 
