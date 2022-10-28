@@ -6,13 +6,14 @@ import matplotlib.pyplot as plt
 import scipy.signal as signal
 import seaborn as sns
 
-'''to open the json file'''
+'''to open multiple json files'''
 file=['Elga.json','mayukha.json','Prathibha.json','Sharika.json','Vishakh.json']
 for i in range(len(file)):
     f = open(file[i])
     dic = json.load(f)
 
 #Question 2
+    '''To view the data present in the given data sets'''
     print(dic['captured_data'].keys())
     print(dic['captured_data']['hr'].keys())
     print(dic['captured_data']['slp'].keys())
@@ -45,7 +46,6 @@ for i in range(len(file)):
     print(type(time_obj))
     Seconds=(milli_second/1000)
     print(type(Seconds))
-
     temp = pd.DataFrame(time_in_millis,columns = ['time_in_ms'])
     from datetime import datetime, timezone
     import pytz
@@ -59,12 +59,13 @@ for i in range(len(file)):
     temp['reference'] = ist_dt
     temp['cumtime'] = temp['reference'] + temp['cumsum']
     temp['bpm'] = bpm
+    '''To plot the heart rate with the time instances'''
     plt.figure(figsize=(15,8))
     sns.scatterplot(data=temp, x="cumtime", y="bpm")
     plt.show()
 
 #Question 3
-    '''Heart rate has been colored if the step count is above 5'''
+    '''Heart rate has been colored in red if the step count is above 5 and blue if below 5'''
     step_count=dic['captured_data']['act']['step count']
     print(type(step_count))
     print(len(step_count))
@@ -81,14 +82,15 @@ for i in range(len(file)):
             plt.plot(x,y,color="blue")
 
     plt.show()
-    '''To filter the above signal'''
+    '''To filter the above signal using butterworth filter'''
     filter_order=12
     cutoff_frequency=0.05
     B, A= signal.butter(filter_order,cutoff_frequency,output='ba')
     filtered_signal=signal.filtfilt(B,A,bpm)
     print(len(filtered_signal))
     for i in range(1,len(new_step_count)):
-        x=new_list_time[(new_list_time > i* 10) & (new_list_time <= (i+1)* 11)]
+        x=new_list_time[(new_list_time > i* 10) & (new_list_time <= (i+1)* 11)] 
+        '''11 has been put inorder to eliminate the gaps overlap the values and get a continuous signal'''
         y=filtered_signal[(new_list_time > i* 10) & (new_list_time <= (i+1)* 11)]
         if new_step_count[i]>5:
             plt.plot(x,y,color="red")
@@ -96,7 +98,9 @@ for i in range(len(file)):
             plt.plot(x,y,color="blue")
     plt.show()
 
-    '''To Plot the Step count using ticks'''
+    '''To Plot the Step count using ticks
+    The ticks value has been accessed and the elements of the ticks has been divided by sampling rate - 512, inorder to convert
+    it into time'''
     ticks=dic['captured_data']['act']['ticks']
     print(len(ticks))
     print(type(ticks))
@@ -107,7 +111,8 @@ for i in range(len(file)):
     print(len(int_tick_list))
     sample=np.array(int_tick_list)/512
     print(sample)
-    cumulative = sample.cumsum().tolist()
+
+    '''To plot the step count with the time instances'''
     tickdf = pd.DataFrame(sample,columns = ['time_in_sec'])
     tickdf['delta'] = pd.to_timedelta(tickdf["time_in_sec"], unit="S")
     tickdf['cumsum'] = tickdf['delta'].cumsum()
