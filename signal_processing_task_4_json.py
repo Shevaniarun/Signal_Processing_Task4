@@ -3,7 +3,9 @@ import numpy as np
 import json;
 from datetime import datetime
 import matplotlib.pyplot as plt
-#to open the json file
+import scipy.signal as signal
+
+'''to open the json file'''
 file=['Elga.json','mayukha.json','Prathibha.json','Sharika.json','Vishakh.json']
 for i in range(len(file)):
     f = open(file[i])
@@ -19,17 +21,10 @@ for i in range(len(file)):
     print(dic['captured_data']['bat'].keys())
     print(dic['captured_data']['err'].keys())
 
-
-# #print(len(dic['captured_data']['hr']['RR in ms']))
-# #print(len(dic['captured_data']['hr']['HR in BPM']))
-# #print(dic['captured_data']['hr']['RR in ms'])
-# #print(dic['captured_data']['hr']['HR in BPM'])
-# #print(type(dic['captured_data']['hr']['RR in ms']))
-# #print(type(dic['captured_data']['hr']['HR in BPM']))
     time_in_millis=dic['captured_data']['hr']['RR in ms']
     bpm=dic['captured_data']['hr']['HR in BPM']
 
-# # Python code to get the Cumulative sum of a list
+# Python code to get the Cumulative sum of a list
     new_list=[]
     j=0
     for i in range(0,len(time_in_millis)):
@@ -65,7 +60,6 @@ for i in range(len(file)):
     temp['cumtime'] = temp['reference'] + temp['cumsum']
     temp['bpm'] = bpm
     import seaborn as sns
-    from matplotlib import pyplot as plt
 
     plt.figure(figsize=(15,8))
     sns.scatterplot(data=temp, x="cumtime", y="bpm")
@@ -80,58 +74,59 @@ for i in range(len(file)):
     bpm=np.array(bpm)
     new=step_count[0:int(new_list[-1]/10)]
     print(len(new))
-# import scipy.signal as signal
-# import matplotlib.pyplot as plt
-# filter_order=4
-# cutoff_frequency=0.05
-# B, A= signal.butter(filter_order,cutoff_frequency,output='ba')
-# filtered_signal=signal.filtfilt(B,A,new)
-
-# x=new_list[(new_list > i* 10) & (new_list <= (i+1)* 10)]
-# y=bpm[(new_list > i* 10) & (new_list <= (i+1)* 10)]
-    filtered_x=[]
-    filtered_y=[]
+    # filtered_x=[]
+    # filtered_y=[]
     for i in range(len(new)):
         x=new_list[(new_list > i* 10) & (new_list <= (i+1)* 10)].tolist()
         y=bpm[(new_list > i* 10) & (new_list <= (i+1)* 10)].tolist()
-  # import pdb;pdb.set_trace()
-  # plt.plot(new_list[(new_list > i* 10) & (new_list <= (i+1)* 10)],bpm[(new_list > i* 10) & (new_list <= (i+1)* 10)])
         if new[i]>5:
             plt.plot(x,y,color="red")
         else:
             plt.plot(x,y,color="blue")
-        filtered_x.append(x)
-        filtered_y.append(y)
+        # filtered_x.append(x)
+        # filtered_y.append(y)
 
     plt.show()
     li=sum(filtered_y,[])
     print(li)
-# import pdb;pdb.set_trace()
     import scipy.signal as signal
     import matplotlib.pyplot as plt
-    filter_order=4
+    filter_order=10
     cutoff_frequency=0.05
     B, A= signal.butter(filter_order,cutoff_frequency,output='ba')
-    filtered_signal=signal.filtfilt(B,A,li)
-    # import pdb;pdb.set_trace()
-    lit=li[-3:-1]
-    print(lit)
-    filtered_signal=np.append(filtered_signal,lit)
+    filtered_signal=signal.filtfilt(B,A,bpm)
     print(len(filtered_signal))
-    print(len(filtered_x))
-    print(len(filtered_y))
-    print(len(li))
     for i in range(len(new)):
         x=new_list[(new_list > i* 10) & (new_list <= (i+1)* 10)]
         y=filtered_signal[(new_list > i* 10) & (new_list <= (i+1)* 10)]
-  # import pdb;pdb.set_trace()
-  # plt.plot(new_list[(new_list > i* 10) & (new_list <= (i+1)* 10)],bpm[(new_list > i* 10) & (new_list <= (i+1)* 10)])
         if new[i]>5:
             plt.plot(x,y,color="red")
         else:
             plt.plot(x,y,color="blue")
 # plt.plot(filtered_signal)
 
+    plt.show()
+    '''To Plot the Step count'''
+    ticks=dic['captured_data']['act']['ticks']
+    print(len(ticks))
+    print(type(ticks))
+    int_tick_list=[] #interger values of ticks
+    for i in range(len(ticks)):
+        tick_int=int(ticks[i])
+        int_tick_list.append(tick_int)
+    print(len(int_tick_list))
+    sample=np.array(int_tick_list)/512
+    print(sample)
+    cumulative = sample.cumsum().tolist()
+    # print(cumulative)
+    tickdf = pd.DataFrame(sample,columns = ['time_in_sec'])
+    tickdf['delta'] = pd.to_timedelta(tickdf["time_in_sec"], unit="S")
+    tickdf['cumsum'] = tickdf['delta'].cumsum()
+    tickdf['reference'] = ist_dt
+    tickdf['cumtime'] = tickdf['reference'] + tickdf['cumsum']
+    tickdf['stepcount'] = dic['captured_data']['act']['step count']
+    plt.figure(figsize=(15,8))
+    sns.scatterplot(data=tickdf, x="cumtime", y="stepcount")
     plt.show()
 
 
